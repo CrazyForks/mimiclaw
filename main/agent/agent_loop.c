@@ -100,6 +100,15 @@ static void agent_loop_task(void *arg)
 
         ESP_LOGI(TAG, "Processing message from %s:%s", msg.channel, msg.chat_id);
 
+        /* Send "working" indicator */
+        {
+            mimi_msg_t status = {0};
+            strncpy(status.channel, msg.channel, sizeof(status.channel) - 1);
+            strncpy(status.chat_id, msg.chat_id, sizeof(status.chat_id) - 1);
+            status.content = strdup("mimi\xF0\x9F\x98\x97is working...");
+            if (status.content) message_bus_push_outbound(&status);
+        }
+
         /* 1. Build system prompt */
         context_build_system_prompt(system_prompt, MIMI_CONTEXT_BUF_SIZE);
 

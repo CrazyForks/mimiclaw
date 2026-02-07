@@ -149,6 +149,7 @@ MimiClaw uses Anthropic's tool use protocol — Claude can call tools during a c
 | Tool | Description |
 |------|-------------|
 | `web_search` | Search the web via Brave Search API for current information |
+| `get_current_time` | Fetch current date/time via HTTP and set the system clock |
 
 To enable web search, set a [Brave Search API key](https://brave.com/search/api/) in your config file or via CLI (`set_search_key`).
 

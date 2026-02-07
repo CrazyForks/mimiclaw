@@ -171,6 +171,7 @@ MimiClaw 使用 Anthropic 的 tool use 协议 — Claude 在对话中可以调�
 | 工具 | 说明 |
 |------|------|
 | `web_search` | 通过 Brave Search API 搜索网页，获取实时信息 |
+| `get_current_time` | 通过 HTTP 获取当前日期和时间，并设置系统时钟 |
 
 启用网页搜索需要设置 [Brave Search API key](https://brave.com/search/api/)，在配置文件或 CLI（`set_search_key`）中设置。
 
