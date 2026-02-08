@@ -24,6 +24,11 @@
 - **nanobot built-in tools** not yet ported: `read_file`, `write_file`, `edit_file`, `list_dir`, `message`
 - **Recommendation**: Reasonable tool subset for ESP32: `read_file`, `write_file`, `list_dir` (SPIFFS), `message`, `memory_write`
 
+### [ ] Cron Scheduled Task Service
+- **nanobot**: `cron/service.py` — full cron scheduler supporting at/every/cron expressions, persistent storage, timed agent triggers
+- **MimiClaw**: Not implemented
+- **Recommendation**: Use FreeRTOS timer for simplified version, support "every N minutes" only
+
 ### [ ] Subagent / Spawn Background Tasks
 - **nanobot**: `subagent.py` — SubagentManager spawns independent agent instances with isolated tool sets and system prompts, announces results back to main agent via system channel
 - **MimiClaw**: Not implemented
@@ -83,11 +88,6 @@
 ---
 
 ## P2 — Advanced Features
-
-### [ ] Cron Scheduled Task Service
-- **nanobot**: `cron/service.py` — full cron scheduler supporting at/every/cron expressions, persistent storage, timed agent triggers
-- **MimiClaw**: Not implemented
-- **Recommendation**: Use FreeRTOS timer for simplified version, support "every N minutes" only
 
 ### [ ] Heartbeat Service
 - **nanobot**: `heartbeat/service.py` — reads HEARTBEAT.md every 30 minutes, triggers agent if tasks are found
@@ -158,12 +158,12 @@
 ```
 1. [done] Tool Use Loop + Tool Registry + web_search
 2. Memory Write via Tool Use         <- makes the agent actually remember
-3. Built-in Tools (read_file, write_file, message)
-4. Telegram Allowlist (allow_from)   <- security essential
-5. Bootstrap File Completion (AGENTS.md, TOOLS.md)
-6. Subagent (simplified)
-7. Telegram Markdown -> HTML
-8. Media Handling
-9. Cron / Heartbeat
-10. Other enhancements
+3. Cron Scheduled Tasks              <- autonomous timed actions
+4. Built-in Tools (read_file, write_file, message)
+5. Telegram Allowlist (allow_from)   <- security essential
+6. Bootstrap File Completion (AGENTS.md, TOOLS.md)
+7. Subagent (simplified)
+8. Telegram Markdown -> HTML
+9. Media Handling
+10. Heartbeat / Other enhancements
 ```

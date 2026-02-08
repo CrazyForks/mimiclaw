@@ -12,12 +12,12 @@
 
 **$5 芯片上的 AI 助理（OpenClaw）。没有 Linux，没有 Node.js，纯 C。**
 
-MimiClaw 把一块小小的 ESP32-S3 开发板变成你的私人 AI 助理。插上 USB 供电，连上 WiFi，通过 Telegram 跟它对话 — 它能处理你丢给它的任何任务，还会随时间积累本地记忆不断进化 — 全部跑在一颗拇指大小的芯片上。
+MimiClaw 把一块小小的 ESP32-S3 开发板变成你的私人 AI 助理。插上 USB 供电，连上 WiFi，通过 Telegram 或飞书跟它对话 — 它能处理你丢给它的任何任务，还会随时间积累本地记忆不断进化 — 全部跑在一颗拇指大小的芯片上。
 
 ## 认识 MimiClaw
 
 - **小巧** — 没有 Linux，没有 Node.js，没有臃肿依赖 — 纯 C
-- **好用** — 在 Telegram 发消息，剩下的它来搞定
+- **好用** — 在 Telegram 或飞书发消息，剩下的它来搞定
 - **忠诚** — 从记忆中学习，跨重启也不会忘
 - **能干** — USB 供电，0.5W，24/7 运行
 - **可爱** — 一块 ESP32-S3 开发板，$5，没了
@@ -31,8 +31,9 @@ MimiClaw 把一块小小的 ESP32-S3 开发板变成你的私人 AI 助理。插
  │ Channels  │     │  Message   │     │  Claude  │     │  Tools  │  │
  │           │────▶│  Queue     │────▶│  (LLM)   │────▶│         │──┘
  │ Telegram  │     └───────────┘     └────┬─────┘     └────┬────┘
- │ WebSocket │◀──────────────────────────-│                │
- └───────────┘        Response            │                │
+ │ Feishu    │◀──────────────────────────-│                │
+ │ WebSocket │        Response            │                │
+ └───────────┘                            │                │
                                     ┌─────▼────────────────▼────┐
                                     │        Context            │
                                     │  ┌──────────┐ ┌────────┐  │
@@ -45,7 +46,7 @@ MimiClaw 把一块小小的 ESP32-S3 开发板变成你的私人 AI 助理。插
                                           ESP32-S3 Flash
 ```
 
-你在 Telegram 发一条消息，ESP32-S3 通过 WiFi 收到后送进 Agent 循环 — Claude 思考、调用工具、读取记忆 — 再把回复发回来。一切都跑在一颗 $5 的芯片上，所有数据存在本地 Flash。
+你在 Telegram 或飞书发一条消息，ESP32-S3 通过 WiFi 收到后送进 Agent 循环 — Claude 思考、调用工具、读取记忆 — 再把回复发回来。一切都跑在一颗 $5 的芯片上，所有数据存在本地 Flash。
 
 ## 快速开始
 
@@ -53,7 +54,7 @@ MimiClaw 把一块小小的 ESP32-S3 开发板变成你的私人 AI 助理。插
 
 - 一块 **ESP32-S3 开发板**，16MB Flash + 8MB PSRAM（如小智 AI 开发板，~¥30）
 - 一根 **USB Type-C 数据线**
-- 一个 **Telegram Bot Token** — 在 Telegram 找 [@BotFather](https://t.me/BotFather) 创建
+- 一个 **Telegram Bot Token** — 在 Telegram 找 [@BotFather](https://t.me/BotFather) 创建（或使用[飞书](docs/FEISHU.md)）
 - 一个 **Anthropic API Key** — 从 [console.anthropic.com](https://console.anthropic.com) 获取
 
 ### 安装
@@ -132,6 +133,8 @@ mimi> set_model claude-sonnet-4-5-20250929  # 换模型
 mimi> set_proxy 192.168.1.83 7897  # 设置代理
 mimi> clear_proxy                  # 清除代理
 mimi> set_search_key BSA...        # 设置 Brave Search API Key
+mimi> set_feishu_id cli_xxx        # 设置飞书 App ID
+mimi> set_feishu_secret xxx        # 设置飞书 App Secret
 mimi> config_show                  # 查看所有配置（脱敏显示）
 mimi> config_reset                 # 清除 NVS，恢复编译时默认值
 ```
@@ -173,6 +176,7 @@ MimiClaw 使用 Anthropic 的 tool use 协议 — Claude 在对话中可以调�
 
 ## 其他功能
 
+- **飞书** — [通过飞书连接](docs/FEISHU.md)，WebSocket 长连接，不需要公网 IP
 - **WebSocket 网关** — 端口 18789，局域网内用任意 WebSocket 客户端连接
 - **OTA 更新** — WiFi 远程刷固件，无需 USB
 - **双核** — 网络 I/O 和 AI 处理分别跑在不同 CPU 核心
@@ -184,6 +188,7 @@ MimiClaw 使用 Anthropic 的 tool use 协议 — Claude 在对话中可以调�
 技术细节在 `docs/` 文件夹：
 
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — 系统设计、模块划分、任务布局、内存分配、协议、Flash 分区
+- **[docs/FEISHU.md](docs/FEISHU.md)** — 飞书配置指南
 - **[docs/TODO.md](docs/TODO.md)** — 功能差距和路线图
 
 ## 许可证

@@ -7,6 +7,7 @@
 #include "memory/session_mgr.h"
 #include "proxy/http_proxy.h"
 #include "tools/tool_web_search.h"
+#include "feishu/feishu_bot.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -223,6 +224,42 @@ static int cmd_set_search_key(int argc, char **argv)
     return 0;
 }
 
+/* --- set_feishu_id command --- */
+static struct {
+    struct arg_str *app_id;
+    struct arg_end *end;
+} feishu_id_args;
+
+static int cmd_set_feishu_id(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **)&feishu_id_args);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, feishu_id_args.end, argv[0]);
+        return 1;
+    }
+    feishu_set_app_id(feishu_id_args.app_id->sval[0]);
+    printf("Feishu App ID saved.\n");
+    return 0;
+}
+
+/* --- set_feishu_secret command --- */
+static struct {
+    struct arg_str *secret;
+    struct arg_end *end;
+} feishu_secret_args;
+
+static int cmd_set_feishu_secret(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **)&feishu_secret_args);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, feishu_secret_args.end, argv[0]);
+        return 1;
+    }
+    feishu_set_app_secret(feishu_secret_args.secret->sval[0]);
+    printf("Feishu App Secret saved.\n");
+    return 0;
+}
+
 /* --- config_show command --- */
 static void print_config(const char *label, const char *ns, const char *key,
                          const char *build_val, bool mask)
@@ -266,6 +303,8 @@ static int cmd_config_show(int argc, char **argv)
     print_config("Proxy Host", MIMI_NVS_PROXY,  MIMI_NVS_KEY_PROXY_HOST, MIMI_SECRET_PROXY_HOST, false);
     print_config("Proxy Port", MIMI_NVS_PROXY,  MIMI_NVS_KEY_PROXY_PORT, MIMI_SECRET_PROXY_PORT, false);
     print_config("Search Key", MIMI_NVS_SEARCH, MIMI_NVS_KEY_API_KEY,  MIMI_SECRET_SEARCH_KEY, true);
+    print_config("Feishu ID",  MIMI_NVS_FEISHU, MIMI_NVS_KEY_FEISHU_APP_ID, MIMI_SECRET_FEISHU_APP_ID, false);
+    print_config("Feishu Sec", MIMI_NVS_FEISHU, MIMI_NVS_KEY_FEISHU_SECRET, MIMI_SECRET_FEISHU_APP_SECRET, true);
     printf("=============================\n");
     return 0;
 }
@@ -274,9 +313,9 @@ static int cmd_config_show(int argc, char **argv)
 static int cmd_config_reset(int argc, char **argv)
 {
     const char *namespaces[] = {
-        MIMI_NVS_WIFI, MIMI_NVS_TG, MIMI_NVS_LLM, MIMI_NVS_PROXY, MIMI_NVS_SEARCH
+        MIMI_NVS_WIFI, MIMI_NVS_TG, MIMI_NVS_LLM, MIMI_NVS_PROXY, MIMI_NVS_SEARCH, MIMI_NVS_FEISHU
     };
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         nvs_handle_t nvs;
         if (nvs_open(namespaces[i], NVS_READWRITE, &nvs) == ESP_OK) {
             nvs_erase_all(nvs);
@@ -441,6 +480,28 @@ esp_err_t serial_cli_init(void)
         .func = &cmd_clear_proxy,
     };
     esp_console_cmd_register(&clear_proxy_cmd);
+
+    /* set_feishu_id */
+    feishu_id_args.app_id = arg_str1(NULL, NULL, "<app_id>", "Feishu App ID");
+    feishu_id_args.end = arg_end(1);
+    esp_console_cmd_t feishu_id_cmd = {
+        .command = "set_feishu_id",
+        .help = "Set Feishu App ID",
+        .func = &cmd_set_feishu_id,
+        .argtable = &feishu_id_args,
+    };
+    esp_console_cmd_register(&feishu_id_cmd);
+
+    /* set_feishu_secret */
+    feishu_secret_args.secret = arg_str1(NULL, NULL, "<secret>", "Feishu App Secret");
+    feishu_secret_args.end = arg_end(1);
+    esp_console_cmd_t feishu_secret_cmd = {
+        .command = "set_feishu_secret",
+        .help = "Set Feishu App Secret",
+        .func = &cmd_set_feishu_secret,
+        .argtable = &feishu_secret_args,
+    };
+    esp_console_cmd_register(&feishu_secret_cmd);
 
     /* config_show */
     esp_console_cmd_t config_show_cmd = {

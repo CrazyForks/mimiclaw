@@ -12,12 +12,12 @@
 
 **The world's first AI assistant(OpenClaw) on a $5 chip. No Linux. No Node.js. Just pure C**
 
-MimiClaw turns a tiny ESP32-S3 board into a personal AI assistant. Plug it into USB power, connect to WiFi, and talk to it through Telegram — it handles any task you throw at it and evolves over time with local memory — all on a chip the size of a thumb.
+MimiClaw turns a tiny ESP32-S3 board into a personal AI assistant. Plug it into USB power, connect to WiFi, and talk to it through Telegram or Feishu — it handles any task you throw at it and evolves over time with local memory — all on a chip the size of a thumb.
 
 ## Meet MimiClaw
 
 - **Tiny** — No Linux, no Node.js, no bloat — just pure C
-- **Handy** — Message it from Telegram, it handles the rest
+- **Handy** — Message it from Telegram or Feishu, it handles the rest
 - **Loyal** — Learns from memory, remembers across reboots
 - **Energetic** — USB power, 0.5 W, runs 24/7
 - **Lovable** — One ESP32-S3 board, $5, nothing else
@@ -31,8 +31,9 @@ MimiClaw turns a tiny ESP32-S3 board into a personal AI assistant. Plug it into 
  │ Channels  │     │  Message   │     │  Claude  │     │  Tools  │  │
  │           │────▶│  Queue     │────▶│  (LLM)   │────▶│         │──┘
  │ Telegram  │     └───────────┘     └────┬─────┘     └────┬────┘
- │ WebSocket │◀──────────────────────────-│                │
- └───────────┘        Response            │                │
+ │ Feishu    │◀──────────────────────────-│                │
+ │ WebSocket │        Response            │                │
+ └───────────┘                            │                │
                                     ┌─────▼────────────────▼────┐
                                     │        Context            │
                                     │  ┌──────────┐ ┌────────┐  │
@@ -45,7 +46,7 @@ MimiClaw turns a tiny ESP32-S3 board into a personal AI assistant. Plug it into 
                                           ESP32-S3 Flash
 ```
 
-You send a message on Telegram. The ESP32-S3 picks it up over WiFi, feeds it into an agent loop — Claude thinks, calls tools, reads memory — and sends the reply back. Everything runs on a single $5 chip with all your data stored locally on flash.
+You send a message on Telegram or Feishu. The ESP32-S3 picks it up over WiFi, feeds it into an agent loop — Claude thinks, calls tools, reads memory — and sends the reply back. Everything runs on a single $5 chip with all your data stored locally on flash.
 
 ## Quick Start
 
@@ -53,7 +54,7 @@ You send a message on Telegram. The ESP32-S3 picks it up over WiFi, feeds it int
 
 - An **ESP32-S3 dev board** with 16 MB flash and 8 MB PSRAM (e.g. Xiaozhi AI board, ~$10)
 - A **USB Type-C cable**
-- A **Telegram bot token** — talk to [@BotFather](https://t.me/BotFather) on Telegram to create one
+- A **Telegram bot token** — talk to [@BotFather](https://t.me/BotFather) on Telegram to create one (or use [Feishu](docs/FEISHU.md) instead)
 - An **Anthropic API key** — from [console.anthropic.com](https://console.anthropic.com)
 
 ### Install
@@ -117,6 +118,8 @@ mimi> set_model claude-sonnet-4-5  # change LLM model
 mimi> set_proxy 127.0.0.1 7897  # set HTTP proxy
 mimi> clear_proxy                  # remove proxy
 mimi> set_search_key BSA...        # set Brave Search API key
+mimi> set_feishu_id cli_xxx        # set Feishu App ID
+mimi> set_feishu_secret xxx        # set Feishu App Secret
 mimi> config_show                  # show all config (masked)
 mimi> config_reset                 # clear NVS, revert to build-time defaults
 ```
@@ -158,6 +161,7 @@ To enable web search, set a [Brave Search API key](https://brave.com/search/api/
 
 ## Also Included
 
+- **Feishu (Lark)** — [connect via Feishu](docs/FEISHU.md) using WebSocket long connection, no public IP needed
 - **WebSocket gateway** on port 18789 — connect from your LAN with any WebSocket client
 - **OTA updates** — flash new firmware over WiFi, no USB needed
 - **Dual-core** — network I/O and AI processing run on separate CPU cores
@@ -169,6 +173,7 @@ To enable web search, set a [Brave Search API key](https://brave.com/search/api/
 Technical details live in the `docs/` folder:
 
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** — system design, module map, task layout, memory budget, protocols, flash partitions
+- **[docs/FEISHU.md](docs/FEISHU.md)** — Feishu (Lark) setup guide
 - **[docs/TODO.md](docs/TODO.md)** — feature gap tracker and roadmap
 
 ## License

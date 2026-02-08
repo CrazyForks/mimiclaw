@@ -31,6 +31,12 @@
 #ifndef MIMI_SECRET_SEARCH_KEY
 #define MIMI_SECRET_SEARCH_KEY      ""
 #endif
+#ifndef MIMI_SECRET_FEISHU_APP_ID
+#define MIMI_SECRET_FEISHU_APP_ID   ""
+#endif
+#ifndef MIMI_SECRET_FEISHU_APP_SECRET
+#define MIMI_SECRET_FEISHU_APP_SECRET ""
+#endif
 
 /* WiFi */
 #define MIMI_WIFI_MAX_RETRY          10
@@ -79,6 +85,11 @@
 #define MIMI_CONTEXT_BUF_SIZE        (16 * 1024)
 #define MIMI_SESSION_MAX_MSGS        20
 
+/* Feishu Bot */
+#define MIMI_FEISHU_STACK            (12 * 1024)
+#define MIMI_FEISHU_PRIO             5
+#define MIMI_FEISHU_CORE             0
+
 /* WebSocket Gateway */
 #define MIMI_WS_PORT                 18789
 #define MIMI_WS_MAX_CLIENTS          4
@@ -94,6 +105,7 @@
 #define MIMI_NVS_LLM                 "llm_config"
 #define MIMI_NVS_PROXY               "proxy_config"
 #define MIMI_NVS_SEARCH              "search_config"
+#define MIMI_NVS_FEISHU              "feishu_config"
 
 /* NVS Keys */
 #define MIMI_NVS_KEY_SSID            "ssid"
@@ -103,4 +115,6 @@
 #define MIMI_NVS_KEY_MODEL           "model"
 #define MIMI_NVS_KEY_PROXY_HOST      "host"
 #define MIMI_NVS_KEY_PROXY_PORT      "port"
+#define MIMI_NVS_KEY_FEISHU_APP_ID   "app_id"
+#define MIMI_NVS_KEY_FEISHU_SECRET   "app_secret"
 

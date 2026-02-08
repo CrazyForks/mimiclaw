@@ -21,6 +21,7 @@
 #include "cli/serial_cli.h"
 #include "proxy/http_proxy.h"
 #include "tools/tool_registry.h"
+#include "feishu/feishu_bot.h"
 
 static const char *TAG = "mimi";
 
@@ -72,6 +73,8 @@ static void outbound_dispatch_task(void *arg)
             telegram_send_message(msg.chat_id, msg.content);
         } else if (strcmp(msg.channel, MIMI_CHAN_WEBSOCKET) == 0) {
             ws_server_send(msg.chat_id, msg.content);
+        } else if (strcmp(msg.channel, MIMI_CHAN_FEISHU) == 0) {
+            feishu_send_message(msg.chat_id, msg.content);
         } else {
             ESP_LOGW(TAG, "Unknown channel: %s", msg.channel);
         }
@@ -107,6 +110,7 @@ void app_main(void)
     ESP_ERROR_CHECK(wifi_manager_init());
     ESP_ERROR_CHECK(http_proxy_init());
     ESP_ERROR_CHECK(telegram_bot_init());
+    ESP_ERROR_CHECK(feishu_bot_init());
     ESP_ERROR_CHECK(llm_proxy_init());
     ESP_ERROR_CHECK(tool_registry_init());
     ESP_ERROR_CHECK(agent_loop_init());
@@ -123,6 +127,7 @@ void app_main(void)
 
             /* Start network-dependent services */
             ESP_ERROR_CHECK(telegram_bot_start());
+            feishu_bot_start();
             ESP_ERROR_CHECK(agent_loop_start());
             ESP_ERROR_CHECK(ws_server_start());
 
