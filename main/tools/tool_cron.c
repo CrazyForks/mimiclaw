@@ -170,17 +170,20 @@ esp_err_t tool_cron_remove_execute(const char *input_json, char *output, size_t 
         return ESP_ERR_INVALID_ARG;
     }
 
-    esp_err_t err = cron_remove_job(job_id);
+    char job_id_copy[16] = {0};
+    strncpy(job_id_copy, job_id, sizeof(job_id_copy) - 1);
+
+    esp_err_t err = cron_remove_job(job_id_copy);
     cJSON_Delete(root);
 
     if (err == ESP_OK) {
-        snprintf(output, output_size, "OK: Removed cron job %s", job_id);
+        snprintf(output, output_size, "OK: Removed cron job %s", job_id_copy);
     } else if (err == ESP_ERR_NOT_FOUND) {
-        snprintf(output, output_size, "Error: job '%s' not found", job_id);
+        snprintf(output, output_size, "Error: job '%s' not found", job_id_copy);
     } else {
         snprintf(output, output_size, "Error: failed to remove job (%s)", esp_err_to_name(err));
     }
 
-    ESP_LOGI(TAG, "cron_remove: %s -> %s", job_id, esp_err_to_name(err));
+    ESP_LOGI(TAG, "cron_remove: %s -> %s", job_id_copy, esp_err_to_name(err));
     return err;
 }

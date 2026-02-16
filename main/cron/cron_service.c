@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include "freertos/FreeRTOS.h"
-#include "freertos/timers.h"
+#include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_random.h"
 #include "cJSON.h"
@@ -18,7 +18,7 @@ static const char *TAG = "cron";
 
 static cron_job_t s_jobs[MAX_CRON_JOBS];
 static int s_job_count = 0;
-static TimerHandle_t s_cron_timer = NULL;
+static TaskHandle_t s_cron_task = NULL;
 
 /* ── Persistence ──────────────────────────────────────────────── */
 
@@ -199,17 +199,11 @@ static esp_err_t cron_save_jobs(void)
     return ESP_OK;
 }
 
-/* ── Timer callback ───────────────────────────────────────────── */
+/* ── Due-job processing ───────────────────────────────────────── */
 
-static void cron_timer_callback(TimerHandle_t xTimer)
+static void cron_process_due_jobs(void)
 {
-    (void)xTimer;
-
     time_t now = time(NULL);
-    if (now < 1700000000) {
-        /* System time not set yet (before ~2023), skip */
-        return;
-    }
 
     bool changed = false;
 
@@ -267,6 +261,16 @@ static void cron_timer_callback(TimerHandle_t xTimer)
     }
 }
 
+static void cron_task_main(void *arg)
+{
+    (void)arg;
+
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(MIMI_CRON_CHECK_INTERVAL_MS));
+        cron_process_due_jobs();
+    }
+}
+
 /* ── Compute initial next_run for a new job ───────────────────── */
 
 static void compute_initial_next_run(cron_job_t *job)
@@ -295,8 +299,8 @@ esp_err_t cron_service_init(void)
 
 esp_err_t cron_service_start(void)
 {
-    if (s_cron_timer) {
-        ESP_LOGW(TAG, "Cron timer already running");
+    if (s_cron_task) {
+        ESP_LOGW(TAG, "Cron task already running");
         return ESP_OK;
     }
 
@@ -313,21 +317,16 @@ esp_err_t cron_service_start(void)
         }
     }
 
-    s_cron_timer = xTimerCreate(
+    BaseType_t ok = xTaskCreate(
+        cron_task_main,
         "cron",
-        pdMS_TO_TICKS(MIMI_CRON_CHECK_INTERVAL_MS),
-        pdTRUE,   /* auto-reload */
+        4096,
         NULL,
-        cron_timer_callback
+        4,
+        &s_cron_task
     );
-
-    if (!s_cron_timer) {
-        ESP_LOGE(TAG, "Failed to create cron timer");
-        return ESP_FAIL;
-    }
-
-    if (xTimerStart(s_cron_timer, pdMS_TO_TICKS(1000)) != pdPASS) {
-        ESP_LOGE(TAG, "Failed to start cron timer");
+    if (ok != pdPASS || !s_cron_task) {
+        ESP_LOGE(TAG, "Failed to create cron task");
         return ESP_FAIL;
     }
 
@@ -338,10 +337,9 @@ esp_err_t cron_service_start(void)
 
 void cron_service_stop(void)
 {
-    if (s_cron_timer) {
-        xTimerStop(s_cron_timer, pdMS_TO_TICKS(1000));
-        xTimerDelete(s_cron_timer, pdMS_TO_TICKS(1000));
-        s_cron_timer = NULL;
+    if (s_cron_task) {
+        vTaskDelete(s_cron_task);
+        s_cron_task = NULL;
         ESP_LOGI(TAG, "Cron service stopped");
     }
 }
